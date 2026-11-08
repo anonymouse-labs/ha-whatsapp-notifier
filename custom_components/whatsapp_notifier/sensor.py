@@ -1,6 +1,7 @@
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 
 from .chat_id import accepts, normalize
 from .const import CONF_CHAT_ID, CONF_ONLY_REPLIES, DOMAIN, SIGNAL_MESSAGE, SIGNAL_STATUS
@@ -34,11 +35,19 @@ class StatusSensor(Base, SensorEntity):
         self.async_on_remove(async_dispatcher_connect(self.hass, SIGNAL_STATUS, self.async_write_ha_state))
 
 
-class ChatSensor(Base, SensorEntity):
+class _LastMessage(ExtraStoredData):
+    def __init__(self, last: dict | None) -> None:
+        self.last = last
+
+    def as_dict(self) -> dict:
+        return {"last": self.last}
+
+
+class ChatSensor(Base, RestoreEntity, SensorEntity):
     """Text of the last message in this chat (max 255 chars); full details are attributes.
 
     Same text twice in a row keeps the state while the `id` attribute changes.
-    shortcut: starts empty after a restart, add RestoreEntity if people need it to survive.
+    The last message survives restarts and reloads via RestoreEntity.
     """
 
     def __init__(self, entry, bridge, key, subentry) -> None:
@@ -62,5 +71,11 @@ class ChatSensor(Base, SensorEntity):
         self._last = m
         self.async_write_ha_state()
 
+    @property
+    def extra_restore_state_data(self) -> _LastMessage:
+        return _LastMessage(self._last)
+
     async def async_added_to_hass(self) -> None:
+        if (data := await self.async_get_last_extra_data()) and (last := data.as_dict().get("last")):
+            self._last = last
         self.async_on_remove(async_dispatcher_connect(self.hass, SIGNAL_MESSAGE, self._on_message))
