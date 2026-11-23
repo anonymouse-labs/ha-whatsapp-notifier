@@ -42,6 +42,10 @@ Berichten die met deze integratie vanuit Home Assistant zijn verstuurd:
 
 De eerste twee vragen om een antwoord. Een antwoord op het bericht kan de herinnering stoppen, zie [Antwoorden](#antwoorden).
 
+De Bridge-Docker-image wordt bij het publiceren van een GitHub Release automatisch
+gebouwd en naar GitHub Container Registry gepusht (`ghcr.io/anonymouse-labs/ha-whatsapp-notifier/whatsapp-bridge`).
+De image bevat multi-arch builds voor `amd64` en `aarch64`.
+
 ### Installatie
 
 #### 1. Bridge-app

@@ -1,8 +1,9 @@
 name: WhatsApp Bridge
 version: "0.3.0"
 slug: whatsapp_bridge
+image: ghcr.io/anonymous-writer/ha-whatsapp-notifier
 description: Self-hosted WhatsApp bridge (linked device) for the WhatsApp Notifier integration
-arch: [amd64, aarch64, armv7]
+arch: [amd64, aarch64]
 init: false
 startup: services
 ports:
